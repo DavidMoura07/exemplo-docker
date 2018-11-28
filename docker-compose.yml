@@ -1,0 +1,46 @@
+# Use postgres/example user/password credentials
+version: '3.7'
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: passdocker
+      POSTGRES_USER: userdocker
+      POSTGRES_DB: dbdocker
+    volumes:
+      - ./postgresql:/var/lib/postgresql
+      - ./postgresql_data:/var/lib/postgresql/data
+    ports:- teste
+      - 5432:5432
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'pg_isready',
+          '-h',
+          'localhost',
+          '-p',
+          '5432',
+          '-d',
+          'dbdocker',
+          '-U',
+          'userdocker',
+        ]
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  web:
+    build: .
+    command: npm start
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_USER: userdocker
+      DB_PASSWORD: passdocker
+      DB_SCHEMA: dbdocker
